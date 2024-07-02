@@ -1,5 +1,7 @@
 package com.burrow.utilities;
 
+import java.time.Duration;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,13 +18,13 @@ public class BurrowUtilities {
 	}
 	
 	public boolean isDisplayed(WebElement element) {
-		wait = new WebDriverWait(driver, 10);
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.visibilityOf(element));
 		return true;
 	}
 	
 	public boolean isElementLocated(By xpath) {
-		wait = new WebDriverWait(driver, 10);
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.visibilityOfElementLocated(xpath));
 		return true;
 	}

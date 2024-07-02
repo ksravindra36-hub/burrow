@@ -6,20 +6,28 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
@@ -76,7 +84,9 @@ public class BasePage {
 			
 			if((browserName.toLowerCase()).contains("chrome")){
 					WebDriverManager.chromedriver().setup();
-					driver = new ChromeDriver();
+					ChromeOptions options = new ChromeOptions();
+					options.addArguments("--remote-allow-origins=*"); // chrome version 111+
+					driver = new ChromeDriver(options);
 			}else if((browserName.toLowerCase()).contains("edge")) {
 					WebDriverManager.edgedriver().clearDriverCache().setup();
 					driver = new EdgeDriver();
@@ -113,14 +123,15 @@ public class BasePage {
 //				driver = new InternetExplorerDriver();
 //				log.debug("IE Launched !!!");
 //			}
-
+			
+			driver.manage().window().maximize();
 			driver.get(config.getProperty("testsiteurl"));
 			log.debug("Navigated to : " + config.getProperty("testsiteurl"));
-			driver.manage().window().maximize();
+			
 			driver.manage().timeouts().implicitlyWait(Integer.parseInt(config.getProperty("implicit.wait")),TimeUnit.SECONDS);
-			wait = new WebDriverWait(driver, 5);
+			wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 			System.out.println("DRIVER : " + driver.getClass());
-			extentTest = extentReports.createTest(context.getName());
+			//extentTest = extentReports.createTest(context.getName());
 		}
 	}
 
@@ -136,7 +147,7 @@ public class BasePage {
 		log.debug("test execution completed !!!");
 	}
 
-	@BeforeSuite
+	//@BeforeSuite
 	public void initialiseExtentReports() {
 		ExtentSparkReporter sparkReporter_all = new ExtentSparkReporter("E:\\Selenium_Class\\diathrive\\src\\main\\resources\\reports\\AllTests.html");
 		sparkReporter_all.config().setReportName("All Tests report");
@@ -152,7 +163,7 @@ public class BasePage {
 		//extentReports.setSystemInfo("Java Version", System.getProperty("java.version"));
 	}
 
-	@AfterSuite
+	//@AfterSuite
 	public void generateExtentReports() throws Exception {
 		extentReports.flush();
 		Desktop.getDesktop().browse(new File("E:\\Selenium_Class\\diathrive\\src\\main\\resources\\reports\\AllTests.html").toURI());
@@ -160,7 +171,7 @@ public class BasePage {
 	}
 
 	
-	@AfterMethod
+	//@AfterMethod
 	public void checkStatus(Method m, ITestResult result) {
 		if(result.getStatus() == ITestResult.FAILURE) {
 			String screenshotPath = null;
@@ -192,4 +203,18 @@ public class BasePage {
 		System.out.println("Screenshot saved successfully");
 		return destFile.getAbsolutePath();
 	}
+	
+	public WebElement fluentWait(final By locator) {
+	    Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+	            .withTimeout(Duration.ofSeconds(10))
+	            .pollingEvery(Duration.ofSeconds(2))
+	            .ignoring(NoSuchElementException.class);
+
+	    WebElement unlockSale = wait.until(new Function<WebDriver, WebElement>() {
+	        public WebElement apply(WebDriver driver) {
+	            return driver.findElement(locator);
+	        }
+	    });
+	    return  unlockSale;
+	};
 }

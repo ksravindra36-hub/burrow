@@ -6,6 +6,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.burrow.base.BasePage;
+import com.burrow.pages.AccountPage;
 import com.burrow.pages.LoginBurrowPage;
 import com.burrow.utilities.ExcelDataReader;
 
@@ -20,20 +21,12 @@ public class LoginBurrowTest extends BasePage{
 	
 	//dataProvider = "testData" String username, String password
 	@Test
-	public void loginDiathriveTest() {
+	public void loginBurrowTest() {
 		LoginBurrowPage loginPage = new LoginBurrowPage(getDriver());
 		log.info("username ;");
 		log.info("password ;");
-		loginPage.setUserName();
-		loginPage.setPassword();
-		loginPage.clickContinueButton();
-		
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Assert.assertTrue(loginPage.verifyWelcomePage().contains("account"),"Successfully logged in");
+		AccountPage accountPage = loginPage.login();
+		log.info("URL " + accountPage.getCurrentURL());
+		Assert.assertTrue(accountPage.getCurrentURL().contains("login"),"Successfully logged in");
 	}
 }
